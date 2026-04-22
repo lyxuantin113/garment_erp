@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------
+  # PostgreSQL Database
+  # Current Setup: Local Development
+  # Future Migration: Azure PostgreSQL / Supabase
+  # ----------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: garment-erp-postgres
+    environment:
+      POSTGRES_DB: garment_erp
+      POSTGRES_USER: erp_user
+      POSTGRES_PASSWORD: erp_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - erp_network
+
+  # ----------------------------------------------------
+  # Redis Cache / Message Broker
+  # Current Setup: Local Development
+  # Future Migration: Azure Cache for Redis / Upstash
+  # ----------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: garment-erp-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - erp_network
+
+  # ----------------------------------------------------
+  # Neo4j Graph Database
+  # Used for Business Logic rules & Agent Knowledge Graph
+  # Current Setup: Local Development
+  # ----------------------------------------------------
+  neo4j:
+    image: neo4j:5.16.0
+    container_name: garment-erp-neo4j
+    environment:
+      # Set basic credentials
+      NEO4J_AUTH: neo4j/erp_password
+      # APOC (Awesome Procedures On Cypher) Plugin Configuration
+      NEO4J_PLUGINS: "[\"apoc\"]"
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+      NEO4J_dbms_security_procedures_allowlist: apoc.*
+      
+      # Additional dev configs for smooth functioning
+      NEO4J_apoc_export_file_enabled: true
+      NEO4J_apoc_import_file_enabled: true
+      NEO4J_apoc_import_file_use__neo4j__config: true
+    ports:
+      - "7474:7474" # Browser GUI
+      - "7687:7687" # Bolt Protocol (for Spring Data)
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+      - neo4j_plugins:/plugins
+    restart: unless-stopped
+    networks:
+      - erp_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_import:
+  neo4j_plugins:
+
+networks:
+  erp_network:
+    driver: bridge

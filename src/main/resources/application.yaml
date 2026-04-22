@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: erp-backend
+  
+  # PostgreSQL Configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/garment_erp
+    username: erp_user
+    password: erp_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  # Redis Configuration
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # Neo4j Graph Database Configuration
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: erp_password
+
+  # Gemini Configuration (via OpenAI-compatible Bridge)
+  ai:
+    openai:
+      api-key: AIzaSyBh_ePtKH1EhQ8K38ueL28fYjgWMJgc7Mw
+      base-url: https://generativelanguage.googleapis.com
+      chat:
+        completions-path: /v1beta/openai/chat/completions
+        options:
+          model: gemini-2.5-flash
